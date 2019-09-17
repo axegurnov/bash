@@ -1,0 +1,31 @@
+
+server {
+	listen 80 default_server;
+	listen [::]:80 default_server;
+
+	root /var/www/html/public;
+
+
+	server_name _;
+		
+	
+	location / {
+        try_files $uri $uri/ /index.php?route=$uri&$args;
+	error_page 404 = @drupal;
+	}
+	
+	location = @drupal{
+		fastcgi_param SCRIPT_FILENAME /var/www/html/public/index.php;
+		fastcgi_param QUERY_STRING q=$request_uri;
+	}
+
+	location ~ \.php$ {
+		include snippets/fastcgi-php.conf;
+		fastcgi_pass unix:/var/run/php/php7.2-fpm.sock;
+		#fastcgi_pass 127.0.0.1:9000;
+	}
+
+	location ~ /\.ht {
+		deny all;
+	}
+}
